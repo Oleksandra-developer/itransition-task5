@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const bCrypt = require("bcryptjs");
 const Status = require("../constants")
+const { v4 } = require("uuid")
 
 const Schema = mongoose.Schema;
 
@@ -30,6 +31,18 @@ lastVisit: {
   type: Date,
  default: null
 },
+token: {
+  type: String,
+  default: null,
+},
+verify: {
+  type: Boolean,
+  default: false,
+},
+verifyToken: {
+  type: String,
+  required: [true, "Verify token is required"],
+},
 })
 
 userSchema.methods.setPassword = function(password) {
@@ -47,6 +60,10 @@ userSchema.methods.createRegDate = function () {
 userSchema.methods.createLastVisitDate = function () {
   this.lastVisit = new Date();
 }
+
+userSchema.methods.createVerifyToken = function () {
+  this.verifyToken = v4();
+};
 const User = mongoose.model("user", userSchema);
 
 module.exports = User;

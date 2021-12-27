@@ -64,6 +64,7 @@ router.post('/registration', async (req, res, next) => {
   }
   try {
     const newUser = new User({ username, email })
+    newUser.createVerifyToken();
     newUser.setPassword(password)
     newUser.createRegDate();
     await newUser.save()
@@ -78,6 +79,8 @@ router.post('/registration', async (req, res, next) => {
     next(error)
   }
 })
+
+
 router.get('/logout', async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
@@ -86,6 +89,10 @@ router.get('/logout', async (req, res, next) => {
         message: "Not authorized",
       });
     }
+     const updateToken = async  (id, token) => {
+      return await User.updateOne({ _id: id }, { token });
+    };
+    await updateToken(req.user._id, null);
     await User.createLastVisitDate();
     res.status(HttpCode.NO_CONTENT).json({});
   } catch (error) {
@@ -93,15 +100,5 @@ router.get('/logout', async (req, res, next) => {
   }
 })
 
-router.get('/list', auth, (req, res, next) => {
-  const { username } = req.user
-  res.json({
-    status: 'success',
-    code: 200,
-    data: {
-      message: `Authorization was successful: ${username}`,
-    },
-  })
-})
 
 module.exports = router
